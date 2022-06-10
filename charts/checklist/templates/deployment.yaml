@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "checklist.fullname" . }}
+  labels:
+  {{- include "checklist.labels" . | nindent 4 }}
+spec:
+  {{- if not .Value.checklist.autoscaling.enabled }}
+  replicas: {{ .Value.checklist.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "checklist.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if $.Value.checklist.forceRedeploy }}
+          {{- include "checklist.genDeploymentTag" . | nindent 8 }}
+        {{- else }}
+        deploymentTag: {{ $.Value.checklist.image.tag }}
+        {{- end }}
+      {{- with .Value.checklist.podAnnotations }}
+        {{- range $key, $value := $.Value.checklist.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ }}
+        {{- end }}
+      {{- end }}
+      labels:
+    {{- include "checklist.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Value.checklist.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "checklist.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Value.checklist.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+          {{- toYaml .Value.checklist.securityContext | nindent 12 }}
+          image: "{{ .Value.checklist.image.repository }}:{{ .Value.checklist.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Value.checklist.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Value.checklist.app.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Value.checklist.app.livenessProbe }}
+              port: http
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: {{ .Value.checklist.app.readinessProbe }}
+              port: http
+            initialDelaySeconds: 10
+          {{- if or $.Value.checklist.app.env }}
+          env:
+            {{- range $key, $value := $.Value.checklist.app.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+          {{- end }}
+          resources:
+      {{- toYaml .Value.checklist.resources | nindent 12 }}
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
+      {{- with .Value.checklist.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Value.checklist.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Value.checklist.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}

@@ -1,0 +1,18 @@
+{{- if .Values.checklist.node_port.nodePort }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ "node-port-" }}{{ include "checklist.fullname" . }}
+  labels:
+  {{- include "checklist.labels" . | nindent 4 }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.checklist.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+      nodePort: {{ .Values.checklist.node_port.nodePort }}
+  selector:
+  {{- include "checklist.selectorLabels" . | nindent 4 }}
+{{- end }}

@@ -1,0 +1,55 @@
+resource:
+  replicaCount: 1
+
+  nameOverride: "resource"
+  fullnameOverride: "resource"
+
+  image:
+    repository: ghcr.io/unitedcollab/resource
+    tag: "test"
+    pullPolicy: Always
+
+  forceRedeploy: false
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+
+  node_port:
+    nodePort:
+
+  app:
+    containerPort: 80
+    livenessProbe: /
+    readinessProbe: /
+    env:
+      APP_MODE: debug
+      APP_POSTGRES_HOST: localhost
+      APP_POSTGRES_PORT: 5432
+      APP_POSTGRES_DATABASE_NAME: blueprint
+      APP_POSTGRES_USER: user
+      APP_POSTGRES_PASSWORD: password
+      APP_TOKEN_CONFIG_CERTIFICATE_DIR_PATH: /rsa
+      APP_TOKEN_CONFIG_CERTIFICATE_FILE_NAME: rsa.crt
+      APP_TOKEN_CONFIG_PRIVATE_KEY_FILE_NAME: rsa.key
+      APP_USER_SERVICE_HTTP_HOST: localhost
+      APP_USER_SERVICE_HTTP_PORT: 9080
+      APP_USER_SERVICE_GRPC_HOST: user
+      APP_USER_SERVICE_GRPC_PORT: 9180
+      APP_S3_ACCESS_KEY_ID: <AWS_ACCESS_KEY_ID>
+      APP_S3_SECRET_ACCESS_KEY: <AWS_SECRET>
+      APP_S3_BUCKET: <S3_BUCKET>
+      GIT_USERNAME: <YOUR_GIT_USERNAME>
+      GIT_ACCESS_TOKEN: <YOUR_GIT_ACCESS_TOKEN>
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80

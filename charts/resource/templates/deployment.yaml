@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "progress.fullname" . }}
+  labels:
+  {{- include "progress.labels" . | nindent 4 }}
+spec:
+  {{- if not .Value.progress.autoscaling.enabled }}
+  replicas: {{ .Value.progress.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "progress.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if $.Value.progress.forceRedeploy }}
+          {{- include "progress.genDeploymentTag" . | nindent 8 }}
+        {{- else }}
+        deploymentTag: {{ $.Value.progress.image.tag }}
+        {{- end }}
+      {{- with .Value.progress.podAnnotations }}
+        {{- range $key, $value := $.Value.progress.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ }}
+        {{- end }}
+      {{- end }}
+      labels:
+    {{- include "progress.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Value.progress.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "progress.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Value.progress.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+          {{- toYaml .Value.progress.securityContext | nindent 12 }}
+          image: "{{ .Value.progress.image.repository }}:{{ .Value.progress.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Value.progress.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Value.progress.app.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Value.progress.app.livenessProbe }}
+              port: http
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: {{ .Value.progress.app.readinessProbe }}
+              port: http
+            initialDelaySeconds: 10
+          {{- if or $.Value.progress.app.env }}
+          env:
+            {{- range $key, $value := $.Value.progress.app.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+          {{- end }}
+          resources:
+      {{- toYaml .Value.progress.resources | nindent 12 }}
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
+      {{- with .Value.progress.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Value.progress.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Value.progress.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}

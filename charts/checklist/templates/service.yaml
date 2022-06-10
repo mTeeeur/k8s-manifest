@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "checklist.fullname" . }}
+  labels:
+    {{- include "checklist.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.checklist.service.type }}
+  ports:
+    - port: {{ .Values.checklist.service.port }}
+      targetPort: {{ .Values.checklist.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "checklist.selectorLabels" . | nindent 4 }}

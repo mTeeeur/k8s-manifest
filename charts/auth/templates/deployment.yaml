@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "auth.fullname" . }}
+  labels:
+  {{- include "auth.labels" . | nindent 4 }}
+spec:
+  {{- if not .Value.auth.autoscaling.enabled }}
+  replicas: {{ .Value.auth.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "auth.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if $.Value.auth.forceRedeploy }}
+          {{- include "auth.genDeploymentTag" . | nindent 8 }}
+        {{- else }}
+        deploymentTag: {{ $.Value.auth.image.tag }}
+        {{- end }}
+      {{- with .Value.auth.podAnnotations }}
+        {{- range $key, $value := $.Value.auth.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ }}
+        {{- end }}
+      {{- end }}
+      labels:
+    {{- include "auth.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Value.auth.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "auth.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Value.auth.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+          {{- toYaml .Value.auth.securityContext | nindent 12 }}
+          image: "{{ .Value.auth.image.repository }}:{{ .Value.auth.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Value.auth.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Value.auth.app.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Value.auth.app.livenessProbe }}
+              port: http
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: {{ .Value.auth.app.readinessProbe }}
+              port: http
+            initialDelaySeconds: 10
+          {{- if or $.Value.auth.app.env }}
+          env:
+            {{- range $key, $value := $.Value.auth.app.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+          {{- end }}
+          resources:
+      {{- toYaml .Value.auth.resources | nindent 12 }}
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
+      {{- with .Value.auth.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Value.auth.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Value.auth.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}

@@ -1,0 +1,28 @@
+{{- if .Values.checklist.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "checklist.fullname" . }}
+  labels:
+    {{- include "checklist.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "checklist.fullname" . }}
+  minReplicas: {{ .Values.checklist.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.checklist.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.checklist.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.checklist.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.checklist.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.checklist.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}

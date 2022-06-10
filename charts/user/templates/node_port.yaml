@@ -1,0 +1,18 @@
+{{- if .Values.user.node_port.nodePort }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ "node-port-" }}{{ include "user.fullname" . }}
+  labels:
+  {{- include "user.labels" . | nindent 4 }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.user.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+      nodePort: {{ .Values.user.node_port.nodePort }}
+  selector:
+  {{- include "user.selectorLabels" . | nindent 4 }}
+{{- end }}

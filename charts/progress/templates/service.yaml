@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "progress.fullname" . }}
+  labels:
+    {{- include "progress.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.progress.service.type }}
+  ports:
+    - port: {{ .Values.progress.service.port }}
+      targetPort: {{ .Values.progress.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "progress.selectorLabels" . | nindent 4 }}
