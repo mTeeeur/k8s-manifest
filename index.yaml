@@ -1,0 +1,58 @@
+apiVersion: v1
+entries:
+  auth:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-06-10T12:40:30.99905758Z"
+    description: A Helm chart for Kubernetes
+    digest: 6551f74706b873f3faeae6bb8fe260c6a44ff467e888b1ca71b6e8d81a891bf1
+    name: auth
+    type: application
+    urls:
+    - https://github.com/mTeeeur/k8s-manifest/releases/download/auth-1.0.0/auth-1.0.0.tgz
+    version: 1.0.0
+  checklist:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-06-10T12:40:31.115884709Z"
+    description: A Helm chart for Kubernetes
+    digest: 7510e3c823f23dbe8ed15820396d69f74cbaadb4f361be70e234af7e173c1bc8
+    name: checklist
+    type: application
+    urls:
+    - https://github.com/mTeeeur/k8s-manifest/releases/download/checklist-1.0.0/checklist-1.0.0.tgz
+    version: 1.0.0
+  progress:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-06-10T12:40:31.220730204Z"
+    description: A Helm chart for Kubernetes
+    digest: a1c679aba2e62bded6bcc02311a4b2c56c4ab439ae2399316697d59d1c1f097a
+    name: progress
+    type: application
+    urls:
+    - https://github.com/mTeeeur/k8s-manifest/releases/download/progress-1.0.0/progress-1.0.0.tgz
+    version: 1.0.0
+  resource:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-06-10T12:40:31.328270906Z"
+    description: A Helm chart for Kubernetes
+    digest: a01bb5bac794ce4f0e6b43c34cff7e8edc513036a460f85ac82bfb8f8eb2fd6c
+    name: resource
+    type: application
+    urls:
+    - https://github.com/mTeeeur/k8s-manifest/releases/download/resource-1.0.0/resource-1.0.0.tgz
+    version: 1.0.0
+  user:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-06-10T12:40:31.439171918Z"
+    description: A Helm chart for Kubernetes
+    digest: 6d4d85dd44c7897bdc7616df24090c0fe1b791b7af889edfb397f701f072dd87
+    name: user
+    type: application
+    urls:
+    - https://github.com/mTeeeur/k8s-manifest/releases/download/user-1.0.0/user-1.0.0.tgz
+    version: 1.0.0
+generated: "2022-06-10T12:40:30.861454993Z"
